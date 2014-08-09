@@ -6,4 +6,5 @@ from django.shortcuts import render
 
 
 def homePage(request):
-    return render(request, 'home.html')
+    return render(request, 'home.html',
+                  {'new_item_text': request.POST.get('item_text', '')})

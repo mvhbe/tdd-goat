@@ -17,7 +17,20 @@ class HomePageTest(TestCase):
 
     def testHomePageReturnsCorrectHtml(self):
         """test home page returns correct html"""
-        request = HttpRequest
+        request = HttpRequest()
         response = homePage(request)
         expectedHtml = render_to_string('home.html')
+        self.assertEqual(response.content.decode(), expectedHtml)
+
+    def testHomePageCanSaveAPostRequest(self):
+        """test home page can save a post request"""
+        request = HttpRequest()
+        request.method = 'POST'
+        request.POST['item_text'] = 'A new list item'
+
+        response = homePage(request)
+
+        self.assertIn('A new list item', response.content.decode())
+        expectedHtml = render_to_string('home.html',
+                                        {'new_item_text': 'A new list item'})
         self.assertEqual(response.content.decode(), expectedHtml)
