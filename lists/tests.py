@@ -8,6 +8,8 @@ from django.template.loader import render_to_string
 from lists.views import homePage
 from lists.models import Item
 
+NEW_ITEM = 'A new list item'
+
 
 class HomePageTest(TestCase):
 
@@ -27,14 +29,41 @@ class HomePageTest(TestCase):
         """test home page can save a post request"""
         request = HttpRequest()
         request.method = 'POST'
-        request.POST['item_text'] = 'A new list item'
+        request.POST['item_text'] = NEW_ITEM
 
         response = homePage(request)
 
-        self.assertIn('A new list item', response.content.decode())
-        expectedHtml = render_to_string('home.html',
-                                        {'new_item_text': 'A new list item'})
-        self.assertEqual(response.content.decode(), expectedHtml)
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, NEW_ITEM)
+
+    def testHomePageRedirectsAfterPost(self):
+        """test home page redirects after post"""
+        request = HttpRequest()
+        request.method = 'POST'
+        request.POST['item_text'] = NEW_ITEM
+
+        response = homePage(request)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['location'], "/")
+
+    def testHomePageOnlySavesItemsWhenNecessary(self):
+        """test home page only saves items when necessary"""
+        request = HttpRequest()
+        homePage(request)
+        self.assertEqual(Item.objects.count(), 0)
+
+    def testHomePageDisplaysAllListItems(self):
+        Item.objects.create(text='Item 1')
+        Item.objects.create(text='Item 2')
+
+        request = HttpRequest()
+        response = homePage(request)
+
+        self.assertIn('Item 1', response.content.decode())
+        self.assertIn('Item 2', response.content.decode())
+
 
 class ItemModelTest(TestCase):
 
