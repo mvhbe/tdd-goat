@@ -36,9 +36,12 @@ class NewVisitorTest(LiveServerTestCase):
         # (Edith's hobby is tying fly-fishing lures)
         inputBox.send_keys('Buy peacock feathers')
 
-        # Whe she hits enter, the page updates, and now the page lists
-        # "1: Buy peacock feathers" as an item in a to-do list
+        # Whe she hits enter, she is taken to a new URL
+        # and now the pages lists
+        # "1: Buy peacock feathers" as an item in a to-do list table
         inputBox.send_keys(Keys.ENTER)
+        edithListUrl = self.browser.current_url
+        self.assertRegex(edithListUrl, '/lists/.+')
         self.checkForRowInListTable('1: Buy peacock feathers')
 
         # There is still a text box inviting her to add another item.
@@ -51,12 +54,34 @@ class NewVisitorTest(LiveServerTestCase):
         self.checkForRowInListTable('1: Buy peacock feathers')
         self.checkForRowInListTable('2: Use peacock feathers to make a fly')
 
-        # Edith wonders whether the site will remember her list.
-        # Then she sees that the site has generated a unique url for her
-        # -- there is some explanatory text to that effect
-        self.fail('Finish the test !')
+        # now a new user, Francis, comes along to the site
 
-        # She visits that url - her to-do list is still there.
+        ## we use a new browser session to make sure that no information
+        ## of Edith's is coming through from cookies etc.
+        self.browser.quit()
+        self.browser = webdriver.Firefox()
 
-        # Satisfied, she goes back to sleep
+        # Francis visits the home page. There's no sing of Edith's list
+        self.browser.get(self.live_server_url)
+        pageText = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Buy peacock feathers', pageText)
+        self.assertNotIn('make a fly', pageText)
+
+        # Francis starts a new list by entering a new item.
+        # He is less interesting than Edith ...
+        inputBox = self.browser.find_element_by_id('id_new_item')
+        inputBox.send_keys("Buy milk")
+        inputBox.send_keys(Keys.ENTER)
+
+        # Francis gets his own unique URL
+        francisListUrl = self.brower.current_url
+        self.assertRegex(francisListUrl, '/lists/.+')
+        self.assertNotEqual(francisListUrl, edithListUrl)
+
+        # Again there's no trace of Edith's list
+        pageText = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Buy peacock feathers', pageText)
+        self.assertIn('Buy milk', pageText)
+
+        # Satisfied, the both go back to sleep
 
