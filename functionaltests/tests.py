@@ -1,6 +1,7 @@
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from unittest import TestCase
 
 
 class NewVisitorTest(LiveServerTestCase):
@@ -74,7 +75,7 @@ class NewVisitorTest(LiveServerTestCase):
         inputBox.send_keys(Keys.ENTER)
 
         # Francis gets his own unique URL
-        francisListUrl = self.brower.current_url
+        francisListUrl = self.browser.current_url
         self.assertRegex(francisListUrl, '/lists/.+')
         self.assertNotEqual(francisListUrl, edithListUrl)
 
@@ -84,4 +85,5 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertIn('Buy milk', pageText)
 
         # Satisfied, the both go back to sleep
+
 

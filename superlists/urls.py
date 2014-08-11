@@ -9,6 +9,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'lists.views.homePage', name='home'),
+    url(r'^lists/only-list/$', 'lists.views.viewList', name='viewList'),
     # url(r'^blog/', include('blog.urls')),
 
     #url(r'^admin/', include(admin.site.urls)),
